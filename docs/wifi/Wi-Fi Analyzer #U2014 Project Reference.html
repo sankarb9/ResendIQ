@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wi-Fi Stability &amp; Dead-Zone Analyzer — Project Reference</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#1c1e21; --muted:#5b6270; --card:#f6f7f9; --border:#e2e5ea;
+    --accent:#2563eb; --code-bg:#f0f2f5; --stable:#2e9e5b; --fair:#c99400; --unstable:#e8781a; --dead:#d64545;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15171a; --fg:#e7e9ec; --muted:#a2a8b3; --card:#1d2024; --border:#2c3036;
+      --accent:#7aa2f7; --code-bg:#101214;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15171a; --fg:#e7e9ec; --muted:#a2a8b3; --card:#1d2024; --border:#2c3036;
+    --accent:#7aa2f7; --code-bg:#101214;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding:2.2rem 1.25rem 4rem;}
+  header{margin-bottom:2rem;}
+  h1{font-size:1.7rem; margin:0 0 .3rem;}
+  .sub{color:var(--muted); font-size:.98rem;}
+  h2{font-size:1.25rem; margin:2.4rem 0 .8rem; padding-bottom:.4rem; border-bottom:1px solid var(--border);}
+  h3{font-size:1.05rem; margin:1.5rem 0 .5rem;}
+  p{margin:.6rem 0;}
+  code{background:var(--code-bg); padding:.15rem .4rem; border-radius:5px; font-size:.9em;
+       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;}
+  pre{background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:.9rem 1rem;
+      overflow-x:auto; max-width:100%; font-size:.88rem;}
+  pre code{background:none; padding:0;}
+  table{border-collapse:collapse; width:100%; margin:.8rem 0; display:block; overflow-x:auto; max-width:100%;}
+  th,td{border:1px solid var(--border); padding:.5rem .7rem; text-align:left; font-size:.92rem; white-space:nowrap;}
+  th{background:var(--card); font-weight:600;}
+  ul,ol{padding-left:1.3rem;}
+  li{margin:.3rem 0;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem 1.2rem; margin:.9rem 0;}
+  .badge{display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.78rem; font-weight:600; color:#fff;}
+  .b-stable{background:var(--stable);} .b-fair{background:var(--fair);}
+  .b-unstable{background:var(--unstable);} .b-dead{background:var(--dead);}
+  .note{border-left:3px solid var(--accent); padding:.5rem .9rem; background:var(--card); border-radius:0 8px 8px 0; margin:.8rem 0;}
+  .warn{border-left:3px solid var(--dead);}
+  .toc{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem 1.3rem;}
+  .toc a{color:var(--accent); text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  .toc ol{margin:.3rem 0;}
+  footer{margin-top:3rem; color:var(--muted); font-size:.85rem; border-top:1px solid var(--border); padding-top:1rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>📡 Wi-Fi Stability &amp; Dead-Zone Analyzer</h1>
+  <div class="sub">Project reference — installed dependencies, file structure, and everything you need to know to run it.</div>
+</header>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#install">What to install</a></li>
+    <li><a href="#files">Project files</a></li>
+    <li><a href="#running">How to run it</a></li>
+    <li><a href="#tabs">What each tab does</a></li>
+    <li><a href="#thresholds">Thresholds &amp; scoring (tune these)</a></li>
+    <li><a href="#data">Where your data lives</a></li>
+    <li><a href="#known">Known limitations / untested parts</a></li>
+    <li><a href="#troubleshoot">Troubleshooting</a></li>
+  </ol>
+</nav>
+
+<h2 id="install">1. What to install</h2>
+<p>You need Python 3.9+ on your laptop. Then, from the project folder, install everything with one command:</p>
+<pre><code>pip install -r requirements.txt</code></pre>
+<p>That installs the following packages:</p>
+<table>
+<tr><th>Package</th><th>Used for</th><th>Required?</th></tr>
+<tr><td><code>streamlit</code></td><td>The dashboard UI itself</td><td>Yes</td></tr>
+<tr><td><code>pandas</code></td><td>Storing/aggregating session data, CSV export</td><td>Yes</td></tr>
+<tr><td><code>plotly</code></td><td>All charts (RTT lines, bar charts, heatmaps, box plots)</td><td>Yes</td></tr>
+<tr><td><code>numpy</code></td><td>Floor-plan heatmap interpolation math</td><td>Yes</td></tr>
+<tr><td><code>Pillow</code></td><td>Drawing the floor-plan image + heatmap overlay</td><td>Yes</td></tr>
+<tr><td><code>streamlit-image-coordinates</code></td><td>Click-to-place points on the floor plan</td><td>Optional — falls back to sliders if missing</td></tr>
+</table>
+<div class="note">
+No other installs are needed. Everything else (<code>sqlite3</code>, <code>subprocess</code>, <code>socket</code>,
+<code>urllib</code>, <code>statistics</code>, <code>concurrent.futures</code>) is part of Python's standard library —
+nothing extra to install for those.
+</div>
+
+<h2 id="files">2. Project files</h2>
+<table>
+<tr><th>File</th><th>Role</th></tr>
+<tr><td><code>core.py</code></td><td>Ping engine, stability scoring, classification, DNS/HTTP checks, statistics (mean/CI). Can also run standalone: <code>python core.py --duration 15</code></td></tr>
+<tr><td><code>db.py</code></td><td>SQLite storage: sessions, raw samples, monitoring log, floor-plan image, saved marker positions</td></tr>
+<tr><td><code>floorplan.py</code></td><td>Inverse-distance-weighted heatmap rendering onto your uploaded floor-plan image</td></tr>
+<tr><td><code>app.py</code></td><td>The Streamlit dashboard — five tabs (see below)</td></tr>
+<tr><td><code>requirements.txt</code></td><td>Dependency list (see above)</td></tr>
+<tr><td><code>wifi_analyzer.db</code></td><td>Created automatically on first run — holds all your collected data</td></tr>
+</table>
+
+<h2 id="running">3. How to run it</h2>
+<div class="card">
+<h3>Step 1 — quick sanity check (recommended before the dashboard)</h3>
+<pre><code>python core.py --duration 15</code></pre>
+<p>Confirms your OS, gateway detection, ping parsing, and DNS/HTTP checks all work before you rely on the dashboard.</p>
+</div>
+<div class="card">
+<h3>Step 2 — launch the dashboard</h3>
+<pre><code>streamlit run app.py</code></pre>
+<p>Opens automatically at <code>http://localhost:8501</code>.</p>
+</div>
+<div class="note">
+Stay connected to Wi-Fi only (no Ethernet) while testing, and stay still in one spot for the duration of each measurement.
+</div>
+
+<h2 id="tabs">4. What each tab does</h2>
+
+<h3>Run test</h3>
+<p>Pick a location name, duration, Wi-Fi band, and whether to include DNS/HTTP checks, then press <strong>Run measurement</strong>.
+Shows status, score, latency/loss/jitter/max, an RTT-over-time chart, and (if enabled) DNS/HTTP usability.</p>
+
+<h3>Compare locations</h3>
+<p>Bar chart of mean score ± 95% confidence interval per location (needs ≥ 2 runs per location for an interval),
+a run-to-run box plot, a 2.4 GHz vs 5 GHz comparison once you've tagged runs with a band, and the full session history.</p>
+
+<h3>Floor plan</h3>
+<p>Upload a photo or sketch of your space, click to place the router and each tested location, and get a color-coded
+coverage heatmap (green → red) once at least 2 locations are placed. Downloadable as PNG.</p>
+
+<h3>Report</h3>
+<p>Auto-generated summary: locations tested, status breakdown, potential dead zones, average latency/loss,
+usability breakdown, worst time of day, and per-location score ± CI. Downloadable as Markdown or CSV.</p>
+
+<h3>Monitor &amp; trends</h3>
+<p>Runs repeated short probes over a set duration at one location, logs each cycle, and alerts when the score
+drops below your threshold. Below that: mean score by hour of day, a weekday × hour heatmap, and a scatter of every
+measurement over time.</p>
+
+<h2 id="thresholds">5. Thresholds &amp; scoring (tune these, they're not universal standards)</h2>
+<p>All defined in <code>core.py</code> under <code>T</code> and <code>APP_T</code>. Defaults:</p>
+<table>
+<tr><th>Status</th><th>Rule (on the primary target, usually the gateway)</th></tr>
+<tr><td><span class="badge b-stable">Stable</span></td><td>avg latency ≤ 50 ms, loss ≤ 1%, jitter ≤ 15 ms</td></tr>
+<tr><td><span class="badge b-fair">Fair</span></td><td>avg latency ≤ 100 ms, loss ≤ 5%, jitter ≤ 30 ms</td></tr>
+<tr><td><span class="badge b-unstable">Unstable</span></td><td>anything worse than Fair, but not yet a dead zone</td></tr>
+<tr><td><span class="badge b-dead">Potential Dead Zone</span></td><td>loss ≥ 10%, or completely unreachable</td></tr>
+</table>
+<p>Score (0–100) is a weighted penalty: 40% loss, 35% latency, 25% jitter. Usability (DNS/HTTP) flags
+<strong>Degraded</strong> above 300 ms DNS or 1500 ms HTTP, and <strong>Unusable</strong> if HTTP fails entirely.</p>
+<div class="note">
+These numbers are starting points from the outline, not networking standards. After collecting real data,
+compare the app's classification against how the Wi-Fi actually felt at each spot (a speed test or video call),
+and adjust the numbers in <code>core.py</code> if needed — then say in your report why you chose the final values.
+</div>
+
+<h2 id="data">6. Where your data lives</h2>
+<ul>
+<li>Everything is stored locally in <code>wifi_analyzer.db</code> (SQLite) in the project folder — nothing leaves your laptop.</li>
+<li>Tables: <code>sessions</code> (one row per test run), <code>samples</code> (every individual ping), <code>monitor</code>
+(continuous-monitoring cycles), <code>floorplan</code> (your uploaded image), <code>coords</code> (marker positions).</li>
+<li>The <strong>Clear all measurements</strong> button (Compare tab) deletes sessions/samples/monitor logs only —
+your floor plan and marker positions are kept.</li>
+<li>To start completely fresh, close Streamlit and delete <code>wifi_analyzer.db</code>.</li>
+</ul>
+
+<h2 id="known">7. Known limitations / parts you should verify yourself</h2>
+<div class="note warn">
+I built and syntax-checked all files, and tested the scoring/classification/statistics logic with synthetic data.
+I could not run real network calls (ping, DNS, HTTP, live Wi-Fi bands) or the browser-based click widget in my
+sandbox — please verify these on your own machine before relying on them for your submission.
+</div>
+<ul>
+<li><strong>Ping output parsing</strong> assumes English-locale <code>ping</code> output. If your OS is set to another
+language, latency parsing may fail silently (falls back to wall-clock timing).</li>
+<li><strong>DNS timing</strong> can be optimistic on repeat runs because the OS caches lookups.</li>
+<li><strong>Floor-plan heatmap</strong> colors between your measured points are interpolated estimates, not real
+measurements — state this clearly if you present the heatmap.</li>
+<li><strong>Continuous monitoring</strong> blocks the Streamlit script while running — keep that browser tab open and
+the laptop awake; closing the tab stops logging.</li>
+<li><strong>Wi-Fi band</strong> is self-reported (you pick it from a dropdown) — the app does not auto-detect 2.4 vs 5 GHz.</li>
+</ul>
+
+<h2 id="troubleshoot">8. Troubleshooting</h2>
+<table>
+<tr><th>Symptom</th><th>Likely fix</th></tr>
+<tr><td>Gateway shows <code>None</code></td><td>Enter it manually — find it via <code>ipconfig</code> (Windows) or
+<code>ip route</code> / <code>route -n get default</code> (Linux/macOS)</td></tr>
+<tr><td>100% loss on everything</td><td>Check ping works directly in your terminal; check firewall isn't blocking ICMP</td></tr>
+<tr><td><code>streamlit-image-coordinates</code> won't install</td><td>Skip it — the Floor Plan tab falls back to X/Y sliders automatically</td></tr>
+<tr><td>Monitoring tab seems frozen</td><td>That's expected — it's a blocking loop for the set duration. Wait it out or reduce "Total time"</td></tr>
+<tr><td>Old database looks broken after update</td><td>It shouldn't — <code>db.init()</code> auto-migrates old databases by adding new columns</td></tr>
+</table>
+
+<footer>
+Wi-Fi Stability &amp; Dead-Zone Analyzer — project reference document.
+</footer>
+
+</div>
+</body>
+</html>

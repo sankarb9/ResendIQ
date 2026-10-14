@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resendiq"
+version = "0.1.0"
+description = "Wi-Fi measurement + ARQ packet-loss recovery simulator"
+requires-python = ">=3.11"
+dependencies = ["streamlit>=1.65", "plotly>=5.20", "pandas>=2.0", "numpy>=1.26", "Pillow>=10.0", "streamlit-image-coordinates>=0.1.6"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
